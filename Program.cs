@@ -10,6 +10,9 @@ builder.Services.AddSwaggerGen();
 
 // configure Db context
 builder.Services.AddDbContext<AppDbContext>(option => option.UseInMemoryDatabase("InMemory"));
+
+builder.Services.AddScoped<ICommandRepo, CommandRepo>();
+
 // configure AutoMapper for dependency injection
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
