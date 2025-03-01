@@ -1,3 +1,4 @@
+using CommandsService.AsyncDataServices;
 using CommandsService.Data;
 using CommandsService.EventProcessing;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,13 @@ builder.Services.AddControllers();
 
 // added singleton for event processing
 builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
+
+// add background service and subscribe to message bus
+builder.Services.AddHostedService<MessageBusSubscriber>();
+
 var app = builder.Build();
+
+var config = app.Configuration;
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
