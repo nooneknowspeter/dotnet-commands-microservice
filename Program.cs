@@ -1,4 +1,5 @@
 using CommandsService.Data;
+using CommandsService.EventProcessing;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // add controllers
 builder.Services.AddControllers();
 
+// added singleton for event processing
+builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
