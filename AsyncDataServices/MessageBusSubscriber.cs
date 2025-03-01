@@ -41,6 +41,22 @@ namespace CommandsService.AsyncDataServices
         _connection.ConnectionShutdownAsync += RabbitMQ_ConnectionShutdown;
 
         Console.WriteLine("S --> Listening on The Message Bus");
+
+
+        var consumer = new AsyncEventingBasicConsumer(_channel);
+
+        consumer.ReceivedAsync += async (ModuleHandle, ea) =>
+        {
+          Console.WriteLine("S --> Event Received");
+
+          var body = ea.Body.ToArray();
+          var notificationMessage = Encoding.UTF8.GetString(body);
+
+          Console.WriteLine($"Received Message: {notificationMessage}");
+
+          await _channel.BasicAckAsync(ea.DeliveryTag, false);
+
+          _eventProcessor.ProcessEvent(notificationMessage);
         };
 
         await _channel.BasicConsumeAsync("queue", false, consumer);
