@@ -33,6 +33,9 @@ builder.Services.AddScoped<IPlatformDataClient, PlatformDataClient>();
 
 var app = builder.Build();
 
+// setup PrepDb class to apply migration during production
+PrepDb.PrepPopulation(app);
+
 var config = app.Configuration;
 
 // Configure the HTTP request pipeline.
