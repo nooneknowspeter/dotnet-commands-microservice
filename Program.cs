@@ -6,6 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// environment variables pre-build
+var isDevelopmentSource = builder.Environment.IsDevelopment();
+var isProductionSource = builder.Environment.IsProduction();
+
+// determine environment
+var isProduction = false;
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -28,13 +35,51 @@ builder.Services.AddSingleton<IEventProcessor, EventProcessor>();
 // add background service and subscribe to message bus
 builder.Services.AddHostedService<MessageBusSubscriber>();
 
-// add platform data client during application scope lifetime
-builder.Services.AddScoped<IPlatformDataClient, PlatformDataClient>();
+
+if (isProductionSource)
+{
+  Console.WriteLine("Setting Up Application for Proudction");
+
+  // add platform data client during application scope lifetime
+  // 
+  //-------------------------------------------------------------------------------------
+  builder.Services.AddScoped<IPlatformDataClient, PlatformDataClient>();
+
+  // set production to true
+  // builds application for production
+  // 
+  //-------------------------------------------------------------------------------------
+  isProduction = true;
+}
+else
+{
+  Console.WriteLine("Setting Up Application for Development");
+
+  // set production to false
+  // builds application for development
+  // 
+  //-------------------------------------------------------------------------------------
+  isProduction = false;
+}
 
 var app = builder.Build();
 
 // setup PrepDb class to apply migration during production
-PrepDb.PrepPopulation(app);
+if (isProduction)
+{
+  PrepDb.PrepPopulation(app);
+}
+
+// setup CORS
+if (isProduction)
+{
+  app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithOrigins("http://frontend-clusterip-service:3000"));
+}
+else
+{
+  app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithOrigins("http://localhost:5173"));
+}
+
 
 var config = app.Configuration;
 
